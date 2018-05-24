@@ -1,7 +1,7 @@
 ﻿Module MathsTokenizerAndParser
-    Public Delegate Function OperatorDelegate(ByVal Param1 As Int32, ByVal Param2 As Int32) As Int32
+    Private Delegate Function OperatorDelegate(ByVal Param1 As Int32, ByVal Param2 As Int32) As Int32
     Private PrecedenceDictionary As New Dictionary(Of String, Int16) From {{"^", 4}, {"*", 3}, {"/", 3}, {"+", 2}, {"-", 2}, {"(", -1}, {")", -1}}
-    Public Function GenerateTokens(ByVal input As String) As List(Of Token)
+    Private Function GenerateTokens(ByVal input As String) As List(Of Token)
         Dim basePointer As Int32 = 0
         Dim topPointer As Int32 = basePointer
         Dim output As New List(Of Token)
@@ -15,11 +15,15 @@
                     If PrecedenceDictionary.ContainsKey(input(basePointer)) Then
                         Exit While
                     End If
+
                     Convert.ToInt32(input.Substring(basePointer, topPointer - basePointer + 1))
                     topPointer += 1
+
                     Continue While
                 Catch ex As Exception
+
                     output.Add(New Token(Convert.ToInt32(input.Substring(basePointer, topPointer - basePointer)), 0))
+
                     Exit While
                 End Try
             End While
@@ -27,28 +31,37 @@
             basePointer = topPointer
 
             Try
+
                 output.Add(New Token(input(basePointer), 2))
                 basePointer += 1
+
             Catch ex As Exception
+
                 Return output
             End Try
 
             While True
+
                 If basePointer + 1 >= input.Count Then
                     Return output
                 End If
 
                 Try
+
                     Convert.ToInt32(input.Substring(basePointer, 1))
                     Exit While
                 Catch ex As Exception
+
                     output.Add(New Token(input(basePointer), 2))
                     basePointer += 1
                 End Try
             End While
         End While
     End Function
-    Public Function EvaluatePostFix(ByVal Tokens As List(Of Token)) As Int32
+    Public Function EvaluateExpression(ByVal input As String) As Int32
+        Return EvaluatePostFix(ShuntingYard(GenerateTokens(input)))
+    End Function
+    Private Function EvaluatePostFix(ByVal Tokens As List(Of Token)) As Int32
         Dim numberStack As New Stack(Of Int32)
         Dim FunctionDictionary As New Dictionary(Of Char, [Delegate]) From {{"+", New OperatorDelegate(AddressOf Add)},
                                                                             {"-", New OperatorDelegate(AddressOf Subtract)},
@@ -61,8 +74,10 @@
             Tokens.RemoveAt(0)
 
             If NextToken.Type = 0 Then
+
                 numberStack.Push(NextToken.Value)
             ElseIf NextToken.Type = 2 And NextToken.Value <> "(" And NextToken.Value <> ")" Then
+
                 Dim First As Int32 = numberStack.Pop()
                 Dim Second As Int32 = numberStack.Pop()
 
@@ -87,7 +102,7 @@
     Private Function Add(ByVal Left As Int32, ByVal Right As Int32) As Int32
         Return Left + Right
     End Function
-    Public Function ShuntingYard(ByVal Input As List(Of Token)) As List(Of Token) ' Converts from infix notation to postfix https://en.wikipedia.org/wiki/Shunting-yard_algorithm Functions not yet tokenized
+    Private Function ShuntingYard(ByVal Input As List(Of Token)) As List(Of Token) ' Converts from infix notation to postfix https://en.wikipedia.org/wiki/Shunting-yard_algorithm Functions not yet tokenized
         Dim output As New List(Of Token)
         Dim OperatorStack As New Stack(Of Token)
         Dim nextToken As New Token()
@@ -134,7 +149,7 @@
 
         Return output
     End Function
-    Public Class Token ' Types {<0, number> ; <1, Function> ; <2, Operator>}
+    Private Class Token ' Types {<0, number> ; <1, Function> ; <2, Operator>}
         Public Value As String
         Public Type As Int16
         Public Precedence As Int16
@@ -155,7 +170,7 @@ End Module
 Module Module1 ' http://www.meta-calculator.com/learning-lab/how-to-build-scientific-calculator/
     Sub Main()
         Dim numberStack As Stack(Of Int32) = New Stack(Of Int32)
-        Dim output As Int32 = EvaluatePostFix(ShuntingYard(GenerateTokens(Console.ReadLine())))
+        Dim output As Int32 = EvaluateExpression(Console.ReadLine())
 
         Console.WriteLine(output)
         Console.ReadKey()

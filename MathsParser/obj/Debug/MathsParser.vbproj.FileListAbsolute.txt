@@ -1,0 +1,11 @@
+H:\Visual Studio 2012\Projects\MathsParser\MathsParser\bin\Debug\MathsParser.exe.config
+H:\Visual Studio 2012\Projects\MathsParser\MathsParser\bin\Debug\MathsParser.exe
+H:\Visual Studio 2012\Projects\MathsParser\MathsParser\bin\Debug\MathsParser.pdb
+H:\Visual Studio 2012\Projects\MathsParser\MathsParser\bin\Debug\MathsParser.xml
+H:\Visual Studio 2012\Projects\MathsParser\MathsParser\obj\Debug\MathsParser.vbprojResolveAssemblyReference.cache
+H:\Visual Studio 2012\Projects\MathsParser\MathsParser\obj\Debug\MathsParser.Resources.resources
+H:\Visual Studio 2012\Projects\MathsParser\MathsParser\obj\Debug\MathsParser.vbproj.GenerateResource.Cache
+H:\Visual Studio 2012\Projects\MathsParser\MathsParser\obj\Debug\MathsParser.vbproj.CoreCompileInputs.cache
+H:\Visual Studio 2012\Projects\MathsParser\MathsParser\obj\Debug\MathsParser.exe
+H:\Visual Studio 2012\Projects\MathsParser\MathsParser\obj\Debug\MathsParser.xml
+H:\Visual Studio 2012\Projects\MathsParser\MathsParser\obj\Debug\MathsParser.pdb

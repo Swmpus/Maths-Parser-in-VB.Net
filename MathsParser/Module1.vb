@@ -1,5 +1,5 @@
 ﻿Module MathsTokenizerAndParser
-    Public Delegate Function operatorDelegate(ByVal Param1 As Int32, ByVal Param2 As Int32) As Int32
+    Public Delegate Function OperatorDelegate(ByVal Param1 As Int32, ByVal Param2 As Int32) As Int32
     Private PrecedenceDictionary As New Dictionary(Of String, Int16) From {{"^", 4}, {"*", 3}, {"/", 3}, {"+", 2}, {"-", 2}, {"(", -1}, {")", -1}}
     Public Function GenerateTokens(ByVal input As String) As List(Of Token)
         Dim basePointer As Int32 = 0
@@ -28,6 +28,7 @@
 
             Try
                 output.Add(New Token(input(basePointer), 2))
+                basePointer += 1
             Catch ex As Exception
                 Return output
             End Try
@@ -39,7 +40,6 @@
 
                 Try
                     Convert.ToInt32(input.Substring(basePointer, 1))
-                    basePointer += 1
                     Exit While
                 Catch ex As Exception
                     output.Add(New Token(input(basePointer), 2))
@@ -50,11 +50,11 @@
     End Function
     Public Function EvaluatePostFix(ByVal Tokens As List(Of Token)) As Int32
         Dim numberStack As New Stack(Of Int32)
-        Dim FunctionDictionary As New Dictionary(Of Char, [Delegate]) From {{"+", New operatorDelegate(AddressOf Add)},
-                                                                            {"-", New operatorDelegate(AddressOf Subtract)},
-                                                                            {"/", New operatorDelegate(AddressOf Divide)},
-                                                                            {"*", New operatorDelegate(AddressOf Multiply)},
-                                                                            {"^", New operatorDelegate(AddressOf Exponent)}}
+        Dim FunctionDictionary As New Dictionary(Of Char, [Delegate]) From {{"+", New OperatorDelegate(AddressOf Add)},
+                                                                            {"-", New OperatorDelegate(AddressOf Subtract)},
+                                                                            {"/", New OperatorDelegate(AddressOf Divide)},
+                                                                            {"*", New OperatorDelegate(AddressOf Multiply)},
+                                                                            {"^", New OperatorDelegate(AddressOf Exponent)}}
         While Tokens.Count > 0
             Dim NextToken As Token = Tokens(0)
 
@@ -69,6 +69,7 @@
                 numberStack.Push(FunctionDictionary(NextToken.Value).DynamicInvoke(Second, First))
             End If
         End While
+
         Return numberStack.Pop()
     End Function
     Private Function Subtract(ByVal Left As Int32, ByVal Right As Int32) As Int32
@@ -97,7 +98,9 @@
             If nextToken.Type = 0 Or nextToken.Type = 1 Then
                 output.Add(nextToken)
                 Input.RemoveAt(0)
-
+            ElseIf nextToken.Value = "(" Then
+                OperatorStack.Push(nextToken)
+                Input.RemoveAt(0)
             ElseIf nextToken.Type = 2 Then
                 If OperatorStack.Count > 0 Then
                     While (OperatorStack.Count > 0 And (OperatorStack.Peek().Type = 1 Or OperatorStack.Peek().Precedence > nextToken.Precedence Or (OperatorStack.Peek().Precedence = nextToken.Precedence And OperatorStack.Peek().Value <> "^")) And OperatorStack.Peek().Value <> "(")
@@ -108,12 +111,7 @@
                         End If
                     End While
                 End If
-                'If Not (nextToken.Value = "(" Or nextToken.Value = ")") Then
                 OperatorStack.Push(nextToken)
-                'End If
-                Input.RemoveAt(0)
-
-            ElseIf nextToken.Value = "(" Then
                 Input.RemoveAt(0)
 
             ElseIf nextToken.Value = ")" Then
@@ -127,7 +125,11 @@
         End While
 
         While OperatorStack.Count() > 0
-            output.Add(OperatorStack.Pop())
+            If Not (OperatorStack.Peek().Value = "(" Or OperatorStack.Peek().Value = ")") Then
+                output.Add(OperatorStack.Pop())
+            Else
+                OperatorStack.Pop()
+            End If
         End While
 
         Return output
